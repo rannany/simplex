@@ -1,2 +1,2 @@
 # simplex
-implementação do algoritmo simplex de duas na forma tabular
+implementação do algoritmo simplex de duas fases, na forma tabular
