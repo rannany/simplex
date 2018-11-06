@@ -1,6 +1,8 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+
+
 //função para visualizar tabela
 void preview(double **matrix, int nrows, int ncols) {
 	for(int i = 0; i < nrows; i++){
