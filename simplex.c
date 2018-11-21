@@ -2,7 +2,7 @@
 #include<stdlib.h>
 
 
-
+int fase = 1;
 //função para visualizar tabela
 void preview(double **matrix, int nrows, int ncols) {
 	for(int i = 0; i < nrows; i++){
@@ -28,23 +28,48 @@ double **table(int nrows, int ncols) {
 
 //função para inicializar tabela
 void initializer(double **matrix, int ncols) {
-	double z[] = {1, -5, -4, 0, 0, 0, 0, 0};
-	double s1[] = {0, 6, 4, 1, 0, 0, 0, 24};
-	double s2[] = {0, 1, 2, 0, 1, 0, 0, 6};
-	double s3[] = {0, -1, 1, 0, 0, 1, 0, 1};
-	double s4[] = {0, 0, 1, 0, 0, 0, 1, 2};
 	
+	double w[] = {-1, -4, 0, 1, 0, 	0, -14};
+	double a1[] = {2, 3, 0, -1, 1, 0, 13};
+	double a2[] = {-1, 1, 0, 0, 0, 1, 1};
+	double f1[] = {4, 1, 1, 0, 0, 0, 21};
+	double z[] = {-6, 1, 0, 0, 0, 0, 0};
+	
+	/*
+	double w[] = {0, 0, 0, -1, -1, 	0, 0};
+	double a1[] = {3, 1, 0, 1, 0, 0, 3};
+	double a2[] = {4, 3, -1, 0, 0, 1, 1};
+	double f1[] = {4, 1, 1, 0, 0, 0, 21};
+	*/
 	for(int i = 0; i < ncols; i++) {
-		matrix[0][i] = z[i];
-		matrix[1][i] = s1[i];
-		matrix[2][i] = s2[i];
-		matrix[3][i] = s3[i];
-		matrix[4][i] = s4[i];
+		matrix[0][i] = w[i];
+		matrix[1][i] = f1[i];
+		matrix[2][i] = a1[i];
+		matrix[3][i] = a2[i];
+		matrix[4][i] = z[i];
+	}
+}
+
+void reinit(double **matrix, double **newMatrix, int nrows, int ncols) {
+	int new_ncols = ncols - 2;
+	int new_nrows = nrows - 1;
+	
+	for(int col = 0; col < new_ncols; col++) {
+		if(col == new_ncols - 1) newMatrix[0][col] = matrix[nrows - 1][ncols -1];
+		else newMatrix[0][col] = matrix[nrows - 1][col];
+	}
+	
+	for(int row = 1; row < new_nrows; row++) {
+		for(int col = 0; col < new_ncols; col++) {
+			if(col == new_ncols - 1) newMatrix[row][col] = matrix[row][ncols -1];
+			else newMatrix[row][col] = matrix[row][col];
+		}
 	}
 }
 
 //função para verificar se matrix esta otimizada
 int isOptimized(double **matrix, int ncols) {
+	
 	for(int i = 0; i < ncols; i++) {
 		if(matrix[0][i] < 0)
 			return 0;
@@ -58,13 +83,13 @@ int getPivoCol(double **matrix, int ncols) {
 	double min_col = matrix[0][0];
 	int pivo = 0;
 	
-	for(int i = 1; i < ncols; i++) {
+	for(int i = 1; i < ncols -1; i++) {
 		if(matrix[0][i] < min_col) {
 			min_col = matrix[0][i];
 			pivo = i;
 		}
 	}
-	return pivo; 
+	return pivo;
 }
 
 //função para encontrar linha pivo
@@ -74,8 +99,9 @@ int getPivoRow (double **matrix, int nrows, int ncols, int pivoCol) {
 	int pivo = 1;
 	double result = 0;
 	
-	for(int i = 2; i < nrows; i++) {
+	for(int i = 1; i < nrows; i++) {
 		result = matrix[i][ncols - 1] / matrix[i][pivoCol];
+		if(i == nrows - 1 && fase == 1) continue;
 		if(result < min_row && result > 0) {
 			min_row = result;
 			pivo = i;
@@ -85,7 +111,6 @@ int getPivoRow (double **matrix, int nrows, int ncols, int pivoCol) {
 }
 
 void calculate(double **matrix, int pivoRow, int pivoCol, int nrows, int ncols) {
-	
 	
 	double pivoElement = matrix[pivoRow][pivoCol];
 	double colElement = 0 ;
@@ -102,28 +127,25 @@ void calculate(double **matrix, int pivoRow, int pivoCol, int nrows, int ncols) 
 	}
 }
 
+
+
 int main() {
 		 
-	//matrix A de coeficiente
-	/*
-	 *   z x1 x2 s1 s2 s3 s4 b
-	 * 	z
-	 * s1
-	 * s2
-	 * s3
-	 * s4
-	 * */
-	 
-	int nrows = 5, ncols = 8, step = 0;
+	int nrows = 5, ncols = 7, step = 0;
 	int pivoRow, pivoCol;
 	double **matrix = table(nrows, ncols);
+	double **newMatrix;
 
 	initializer(matrix, ncols);
 	
-	printf("step: %d\n", step);
-	preview(matrix, nrows, ncols);
+
+	printf("primeira fase: \n");
+	printf("step: %d \n", step);
+	preview(matrix, nrows, ncols);	
 	
+
 	while(isOptimized(matrix, ncols) == 0) {
+		
 		step += 1;
 		
 		printf("\n\n");
@@ -132,10 +154,38 @@ int main() {
 		pivoRow = getPivoRow(matrix, nrows, ncols, pivoCol);
 		
 		calculate(matrix, pivoRow, pivoCol, nrows, ncols);
-		
 		preview(matrix, nrows, ncols);	
 	}
 	
-	printf("\n\nBest Value of Optimization: z = %.2f", matrix[0][ncols -1]);
+	
+	
+	printf("\n\nSegunda fase: \n");
+	step = 0;
+	fase = 2;
+	printf("step: %d \n", step); 
+	newMatrix = table(nrows -1, ncols - 2);
+	reinit(matrix, newMatrix, nrows, ncols);
+	
+	preview(newMatrix, nrows - 1, ncols -2);
+	
+	
+	while(isOptimized(newMatrix, ncols) == 0) {
+		
+		step += 1;
+		
+		printf("\n\n");
+		printf("step: %d\n", step);
+		pivoCol = getPivoCol(newMatrix, ncols -2);
+		pivoRow = getPivoRow(newMatrix, nrows - 1, ncols - 2, pivoCol);
+		
+		calculate(newMatrix, pivoRow, pivoCol, nrows - 1, ncols -2);
+		preview(newMatrix, nrows -1, ncols -2);	
+	}
+	
+	
+	printf("\n\nBest Value of Optimization: z = %.2f", newMatrix[0][ncols -3]);
+
+	free(matrix);
+	free(newMatrix);
 	return 0;
 }
